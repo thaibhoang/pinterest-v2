@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  description: MyText
+  keep_secret: false
+  user: one
+  cover_url: MyString
+
+two:
+  name: MyString
+  description: MyText
+  keep_secret: false
+  user: two
+  cover_url: MyString

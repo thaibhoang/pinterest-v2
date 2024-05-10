@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_10_144615) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_10_153035) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,6 +42,91 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_10_144615) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "boards", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.boolean "keep_secret"
+    t.bigint "user_id", null: false
+    t.string "cover_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_boards_on_user_id"
+  end
+
+  create_table "comments", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "pin_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "body"
+    t.bigint "parent_id"
+    t.index ["parent_id"], name: "index_comments_on_parent_id"
+    t.index ["pin_id"], name: "index_comments_on_pin_id"
+    t.index ["user_id"], name: "index_comments_on_user_id"
+  end
+
+  create_table "follows", force: :cascade do |t|
+    t.bigint "follower_id", null: false
+    t.bigint "followee_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["followee_id"], name: "index_follows_on_followee_id"
+    t.index ["follower_id"], name: "index_follows_on_follower_id"
+  end
+
+  create_table "likes", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "likeable_type", null: false
+    t.bigint "likeable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["likeable_type", "likeable_id"], name: "index_likes_on_likeable"
+    t.index ["user_id", "likeable_type", "likeable_id"], name: "index_likes_on_user_id_and_likeable_type_and_likeable_id", unique: true
+    t.index ["user_id"], name: "index_likes_on_user_id"
+  end
+
+  create_table "notes", force: :cascade do |t|
+    t.text "content"
+    t.bigint "user_id", null: false
+    t.bigint "pin_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pin_id"], name: "index_notes_on_pin_id"
+    t.index ["user_id"], name: "index_notes_on_user_id"
+  end
+
+  create_table "pins", force: :cascade do |t|
+    t.string "title"
+    t.text "description"
+    t.text "link"
+    t.bigint "user_id", null: false
+    t.string "image_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_pins_on_user_id"
+  end
+
+  create_table "profiles", force: :cascade do |t|
+    t.string "username"
+    t.text "about"
+    t.bigint "user_id", null: false
+    t.string "avatar_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_profiles_on_user_id"
+  end
+
+  create_table "saved_pins", force: :cascade do |t|
+    t.bigint "pin_id", null: false
+    t.bigint "user_id", null: false
+    t.bigint "board_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["board_id"], name: "index_saved_pins_on_board_id"
+    t.index ["pin_id"], name: "index_saved_pins_on_pin_id"
+    t.index ["user_id"], name: "index_saved_pins_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -56,4 +141,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_10_144615) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "boards", "users"
+  add_foreign_key "comments", "comments", column: "parent_id"
+  add_foreign_key "comments", "pins"
+  add_foreign_key "comments", "users"
+  add_foreign_key "follows", "users", column: "followee_id"
+  add_foreign_key "follows", "users", column: "follower_id"
+  add_foreign_key "likes", "users"
+  add_foreign_key "notes", "pins"
+  add_foreign_key "notes", "users"
+  add_foreign_key "pins", "users"
+  add_foreign_key "profiles", "users"
+  add_foreign_key "saved_pins", "boards"
+  add_foreign_key "saved_pins", "pins"
+  add_foreign_key "saved_pins", "users"
 end
